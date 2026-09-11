@@ -1,6 +1,7 @@
 package com.airtribe.meditrack.constants;
 
 public final class Constants {
+    private static final String CONFIG_STATUS_KEY = "meditrack.config.status";
     public static final String APP_NAME = "MediTrack";
     public static final String CONFIG_STATUS;
     public static final double TAX_RATE = 0.18;
@@ -8,7 +9,7 @@ public final class Constants {
     public static final int MAX_PATIENT_AGE = 120;
 
     static {
-        CONFIG_STATUS = "Application constants loaded.";
+        CONFIG_STATUS = System.getProperty(CONFIG_STATUS_KEY, "Application constants loaded.");
     }
 
     private Constants() {

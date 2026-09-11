@@ -13,4 +13,12 @@ public final class Validator {
     public static boolean isValidAge(int age) {
         return age >= Constants.MIN_PATIENT_AGE && age <= Constants.MAX_PATIENT_AGE;
     }
+
+    public static boolean isNonNegative(double value) {
+        return value >= 0;
+    }
+
+    public static boolean isPresent(Object value) {
+        return value == null;
+    }
 }
