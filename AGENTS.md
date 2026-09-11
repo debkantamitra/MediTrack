@@ -26,6 +26,17 @@ For every meaningful change, explain:
 - Explain code in plain language before adding another abstraction.
 - Preserve the package base `com.airtribe.meditrack`.
 
+## Learner Participation
+
+- Once in a while, pause before implementing a small, safe part of the code and ask the learner to try it first.
+- Prefer learner tasks that take 5-15 minutes, such as adding a field, writing a constructor, creating a simple method, or adding one menu option.
+- Make the task specific: name the file, method, expected behavior, and how the learner can verify it.
+- After the learner tries, review their code kindly, explain what works, and suggest the smallest correction if needed.
+- Do not block urgent fixes or broken builds just to force learner participation.
+- Occasionally ask short quizzes before or after a concept is introduced. Keep quizzes practical and tied to MediTrack examples.
+- Use quizzes to check understanding of Java syntax, OOP, SOLID principles, design choices, and tradeoffs.
+- For quizzes, prefer 1-3 questions at a time and include answers or explanations after the learner responds.
+
 ## SOLID Principles To Reinforce
 
 - Single Responsibility Principle: each class should have one clear reason to change.
