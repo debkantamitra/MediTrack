@@ -34,7 +34,7 @@ Without validation, code like this would be allowed:
 
 ```java
 new Patient("P1", "", -5);
-new Doctor("D1", "", "", -2);
+new Doctor("D1", "", null, -2);
 new Appointment("A1", null, null, null);
 ```
 

@@ -48,28 +48,28 @@ public class Appointment extends MedicalEntity {
     }
 
     public void setDoctor(Doctor doctor) {
-        if (Validator.isPresent(doctor)) {
+        if (!Validator.isPresent(doctor)) {
             throw new InvalidDataException("Appointment doctor is required.");
         }
         this.doctor = doctor;
     }
 
     public void setPatient(Patient patient) {
-        if (Validator.isPresent(patient)) {
+        if (!Validator.isPresent(patient)) {
             throw new InvalidDataException("Appointment patient is required.");
         }
         this.patient = patient;
     }
 
     public void setAppointmentDate(Date appointmentDate) {
-        if (Validator.isPresent(appointmentDate)) {
+        if (!Validator.isPresent(appointmentDate)) {
             throw new InvalidDataException("Appointment date is required.");
         }
         this.appointmentDate = new Date(appointmentDate.getTime());
     }
 
     public void setStatus(AppointmentStatus status) {
-        if (Validator.isPresent(status)) {
+        if (!Validator.isPresent(status)) {
             throw new InvalidDataException("Appointment status is required.");
         }
         this.status = status;

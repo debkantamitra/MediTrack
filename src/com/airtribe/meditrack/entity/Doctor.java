@@ -5,14 +5,14 @@ import com.airtribe.meditrack.util.Validator;
 
 public class Doctor extends MedicalEntity {
     private String name;
-    private String specialization;
+    private Specialization specialization;
     private double experience;
 
-    public Doctor(String id, String name, String specialization) {
+    public Doctor(String id, String name, Specialization specialization) {
         this(id, name, specialization, 0);
     }
 
-    public Doctor(String id, String name, String specialization, double experience) {
+    public Doctor(String id, String name, Specialization specialization, double experience) {
         super(id);
         setName(name);
         setSpecialization(specialization);
@@ -28,7 +28,7 @@ public class Doctor extends MedicalEntity {
         return name;
     }
 
-    public String getSpecialization() {
+    public Specialization getSpecialization() {
         return specialization;
     }
 
@@ -43,9 +43,9 @@ public class Doctor extends MedicalEntity {
         this.name = name;
     }
 
-    public void setSpecialization(String specialization) {
-        if (!Validator.isValidName(specialization)) {
-            throw new InvalidDataException("Doctor specialization cannot be blank.");
+    public void setSpecialization(Specialization specialization) {
+        if (!Validator.isPresent(specialization)) {
+            throw new InvalidDataException("Doctor specialization is required.");
         }
         this.specialization = specialization;
     }

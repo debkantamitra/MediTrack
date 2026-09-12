@@ -51,7 +51,7 @@ public class Patient extends MedicalEntity {
     }
 
     public void setAdmissionStatus(AdmissionStatus admissionStatus) {
-        if (Validator.isPresent(admissionStatus)) {
+        if (!Validator.isPresent(admissionStatus)) {
             throw new InvalidDataException("Admission status is required.");
         }
         this.admissionStatus = admissionStatus;

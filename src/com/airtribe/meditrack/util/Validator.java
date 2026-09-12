@@ -19,6 +19,6 @@ public final class Validator {
     }
 
     public static boolean isPresent(Object value) {
-        return value == null;
+        return value != null;
     }
 }
