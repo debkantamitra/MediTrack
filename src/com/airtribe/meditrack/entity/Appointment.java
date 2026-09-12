@@ -5,7 +5,7 @@ import com.airtribe.meditrack.util.Validator;
 
 import java.util.Date;
 
-public class Appointment extends MedicalEntity {
+public class Appointment extends MedicalEntity implements Cloneable {
     private Doctor doctor;
     private Patient patient;
     private Date appointmentDate;
@@ -29,6 +29,11 @@ public class Appointment extends MedicalEntity {
                 + " Patient name: " + patient.getName()
                 + " appointment at: " + appointmentDate
                 + " status: " + status;
+    }
+
+    @Override
+    public Appointment clone() {
+        return new Appointment(getId(), doctor, patient.clone(), appointmentDate, status);
     }
 
     public Doctor getDoctor() {

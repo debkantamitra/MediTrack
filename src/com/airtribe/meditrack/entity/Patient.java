@@ -3,7 +3,7 @@ package com.airtribe.meditrack.entity;
 import com.airtribe.meditrack.exception.InvalidDataException;
 import com.airtribe.meditrack.util.Validator;
 
-public class Patient extends MedicalEntity {
+public class Patient extends MedicalEntity implements Cloneable {
     private String name;
     private int age;
     private AdmissionStatus admissionStatus;
@@ -22,6 +22,11 @@ public class Patient extends MedicalEntity {
     @Override
     public String getDisplayName() {
         return "Patient name: " + name + " age: " + age + " status: " + admissionStatus;
+    }
+
+    @Override
+    public Patient clone() {
+        return new Patient(getId(), name, age, admissionStatus);
     }
 
     public String getName() {

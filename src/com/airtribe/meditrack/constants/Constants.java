@@ -4,6 +4,8 @@ public final class Constants {
     private static final String CONFIG_STATUS_KEY = "meditrack.config.status";
     public static final String APP_NAME = "MediTrack";
     public static final String CONFIG_STATUS;
+    public static final String PATIENTS_CSV_PATH = "data/patients.csv";
+    public static final String DOCTORS_CSV_PATH = "data/doctors.csv";
     public static final double TAX_RATE = 0.18;
     public static final int MIN_PATIENT_AGE = 0;
     public static final int MAX_PATIENT_AGE = 120;
