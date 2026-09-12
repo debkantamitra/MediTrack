@@ -12,9 +12,7 @@ import com.airtribe.meditrack.service.AppointmentService;
 import com.airtribe.meditrack.service.DoctorService;
 import com.airtribe.meditrack.service.PatientService;
 import com.airtribe.meditrack.service.billing.BillingStrategy;
-import com.airtribe.meditrack.service.billing.EmergencyBillingStrategy;
-import com.airtribe.meditrack.service.billing.FollowUpBillingStrategy;
-import com.airtribe.meditrack.service.billing.StandardBillingStrategy;
+import com.airtribe.meditrack.service.billing.BillingStrategyFactory;
 import com.airtribe.meditrack.util.CSVUtil;
 import com.airtribe.meditrack.util.IdGenerator;
 
@@ -42,7 +40,7 @@ public class Main {
         Main app = new Main();
 
         System.out.println("Welcome to " + Constants.APP_NAME);
-        System.out.println("Milestone 15: menu-driven console UI");
+        System.out.println("Milestone 16: Factory Pattern for billing strategies");
         System.out.println(Constants.CONFIG_STATUS);
 
         if (hasArgument(args, "--loadData")) {
@@ -236,16 +234,7 @@ public class Main {
         System.out.println("3. Follow up");
 
         int choice = readInt("Choose billing type: ");
-        switch (choice) {
-            case 1:
-                return new StandardBillingStrategy();
-            case 2:
-                return new EmergencyBillingStrategy();
-            case 3:
-                return new FollowUpBillingStrategy();
-            default:
-                throw new InvalidDataException("Invalid billing type.");
-        }
+        return BillingStrategyFactory.create(choice);
     }
 
     private String readText(String prompt) {
