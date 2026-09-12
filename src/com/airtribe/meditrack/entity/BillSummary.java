@@ -5,6 +5,7 @@ public final class BillSummary {
     private final String appointmentId;
     private final String patientName;
     private final String doctorName;
+    private final String billingType;
     private final double consultationFee;
     private final double taxAmount;
     private final double totalAmount;
@@ -14,6 +15,7 @@ public final class BillSummary {
             String appointmentId,
             String patientName,
             String doctorName,
+            String billingType,
             double consultationFee,
             double taxAmount,
             double totalAmount
@@ -22,6 +24,7 @@ public final class BillSummary {
         this.appointmentId = appointmentId;
         this.patientName = patientName;
         this.doctorName = doctorName;
+        this.billingType = billingType;
         this.consultationFee = consultationFee;
         this.taxAmount = taxAmount;
         this.totalAmount = totalAmount;
@@ -43,6 +46,10 @@ public final class BillSummary {
         return doctorName;
     }
 
+    public String getBillingType() {
+        return billingType;
+    }
+
     public double getConsultationFee() {
         return consultationFee;
     }
@@ -60,6 +67,7 @@ public final class BillSummary {
                 + " appointment: " + appointmentId
                 + " patient: " + patientName
                 + " doctor: " + doctorName
+                + " type: " + billingType
                 + " total: " + totalAmount;
     }
 }

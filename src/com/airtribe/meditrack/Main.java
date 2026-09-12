@@ -10,9 +10,11 @@ import com.airtribe.meditrack.entity.MedicalEntity;
 import com.airtribe.meditrack.entity.Patient;
 import com.airtribe.meditrack.entity.Specialization;
 import com.airtribe.meditrack.service.AppointmentService;
+import com.airtribe.meditrack.service.billing.EmergencyBillingStrategy;
 import com.airtribe.meditrack.service.DoctorService;
 import com.airtribe.meditrack.service.PatientService;
 import com.airtribe.meditrack.util.CSVUtil;
+import com.airtribe.meditrack.util.IdGenerator;
 import com.airtribe.meditrack.util.Validator;
 
 import java.io.IOException;
@@ -27,7 +29,7 @@ public class Main {
         int roundedFee = (int) consultationFee;
 
         System.out.println("Welcome to " + Constants.APP_NAME);
-        System.out.println("Milestone 12: file I/O and command-line loading");
+        System.out.println("Milestone 14: Strategy Pattern for billing");
         System.out.println("Patient name valid: " + Validator.isValidName(patientName));
         System.out.println("Patient age valid: " + Validator.isValidAge(patientAge));
         System.out.println("Consultation fee: " + consultationFee);
@@ -49,15 +51,16 @@ public class Main {
         PatientService patientService = new PatientService();
         DoctorService doctorService = new DoctorService();
         AppointmentService appointmentService = new AppointmentService();
+        IdGenerator idGenerator = IdGenerator.getInstance();
 
         if (hasArgument(args, "--loadData")) {
             loadSavedData(patientService, doctorService);
         }
 
-        Patient patient = new Patient("P-001", "Asha", 29);
-        Patient secondPatient = new Patient("P-002", "Asha Kapoor", 35);
-        Doctor doctor = new Doctor("D-001", "Dr. Rao", Specialization.CARDIOLOGY, 12);
-        Doctor secondDoctor = new Doctor("D-002", "Dr. Sen", Specialization.DERMATOLOGY, 7);
+        Patient patient = new Patient(idGenerator.nextPatientId(), "Asha", 29);
+        Patient secondPatient = new Patient(idGenerator.nextPatientId(), "Asha Kapoor", 35);
+        Doctor doctor = new Doctor(idGenerator.nextDoctorId(), "Dr. Rao", Specialization.CARDIOLOGY, 12);
+        Doctor secondDoctor = new Doctor(idGenerator.nextDoctorId(), "Dr. Sen", Specialization.DERMATOLOGY, 7);
 
         patientService.addPatient(patient);
         patientService.addPatient(secondPatient);
@@ -72,16 +75,20 @@ public class Main {
         System.out.println("Patients aged 35: " + patientService.searchPatient(35).size());
         System.out.println("Cardiology doctors: " + doctorService.search(Specialization.CARDIOLOGY).size());
 
-        Appointment appointment = appointmentService.createAppointment("A-001", doctor, patient, new Date());
+        Appointment appointment = appointmentService.createAppointment(idGenerator.nextAppointmentId(), doctor, patient, new Date());
         System.out.println("Appointments stored: " + appointmentService.countAppointments());
         System.out.println("Created appointment: " + appointment.getDisplayName());
 
         appointmentService.cancelAppointment("A-001");
         System.out.println("Cancelled appointments: " + appointmentService.search(AppointmentStatus.CANCELLED).size());
 
-        Bill bill = new Bill("B-001", appointment, 800);
+        Bill bill = new Bill(idGenerator.nextBillId(), appointment, 800);
         BillSummary billSummary = bill.generateBill();
         System.out.println("Generated bill: " + billSummary.getDisplayText());
+
+        Bill emergencyBill = new Bill(idGenerator.nextBillId(), appointment, 800, new EmergencyBillingStrategy());
+        BillSummary emergencyBillSummary = emergencyBill.generateBill();
+        System.out.println("Generated emergency bill: " + emergencyBillSummary.getDisplayText());
 
         Appointment clonedAppointment = appointment.clone();
         patient.setName("Asha Updated");
