@@ -2,6 +2,7 @@ package com.airtribe.meditrack.service;
 
 import com.airtribe.meditrack.entity.Doctor;
 import com.airtribe.meditrack.entity.Specialization;
+import com.airtribe.meditrack.exception.EntityNotFoundException;
 import com.airtribe.meditrack.exception.InvalidDataException;
 import com.airtribe.meditrack.interfaces.Searchable;
 import com.airtribe.meditrack.util.DataStore;
@@ -80,7 +81,7 @@ public class DoctorService implements Searchable<Doctor, Specialization> {
 
         Doctor doctor = doctorStore.findById(id);
         if (!Validator.isPresent(doctor)) {
-            throw new InvalidDataException("Doctor not found for id: " + id);
+            throw new EntityNotFoundException("Doctor", id);
         }
         return doctor;
     }

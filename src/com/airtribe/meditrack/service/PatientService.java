@@ -2,6 +2,7 @@ package com.airtribe.meditrack.service;
 
 import com.airtribe.meditrack.entity.AdmissionStatus;
 import com.airtribe.meditrack.entity.Patient;
+import com.airtribe.meditrack.exception.EntityNotFoundException;
 import com.airtribe.meditrack.exception.InvalidDataException;
 import com.airtribe.meditrack.interfaces.Searchable;
 import com.airtribe.meditrack.util.DataStore;
@@ -84,7 +85,7 @@ public class PatientService implements Searchable<Patient, String> {
 
         Patient patient = patientStore.findById(id);
         if (!Validator.isPresent(patient)) {
-            throw new InvalidDataException("Patient not found for id: " + id);
+            throw new EntityNotFoundException("Patient", id);
         }
         return patient;
     }
