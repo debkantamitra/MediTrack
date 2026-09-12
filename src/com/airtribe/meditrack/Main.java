@@ -2,101 +2,275 @@ package com.airtribe.meditrack;
 
 import com.airtribe.meditrack.constants.Constants;
 import com.airtribe.meditrack.entity.Appointment;
-import com.airtribe.meditrack.entity.AppointmentStatus;
 import com.airtribe.meditrack.entity.Bill;
 import com.airtribe.meditrack.entity.BillSummary;
 import com.airtribe.meditrack.entity.Doctor;
-import com.airtribe.meditrack.entity.MedicalEntity;
 import com.airtribe.meditrack.entity.Patient;
 import com.airtribe.meditrack.entity.Specialization;
+import com.airtribe.meditrack.exception.InvalidDataException;
 import com.airtribe.meditrack.service.AppointmentService;
-import com.airtribe.meditrack.service.billing.EmergencyBillingStrategy;
 import com.airtribe.meditrack.service.DoctorService;
 import com.airtribe.meditrack.service.PatientService;
+import com.airtribe.meditrack.service.billing.BillingStrategy;
+import com.airtribe.meditrack.service.billing.EmergencyBillingStrategy;
+import com.airtribe.meditrack.service.billing.FollowUpBillingStrategy;
+import com.airtribe.meditrack.service.billing.StandardBillingStrategy;
 import com.airtribe.meditrack.util.CSVUtil;
 import com.airtribe.meditrack.util.IdGenerator;
-import com.airtribe.meditrack.util.Validator;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
+    private final PatientService patientService;
+    private final DoctorService doctorService;
+    private final AppointmentService appointmentService;
+    private final IdGenerator idGenerator;
+    private final Scanner scanner;
+
+    public Main() {
+        this.patientService = new PatientService();
+        this.doctorService = new DoctorService();
+        this.appointmentService = new AppointmentService();
+        this.idGenerator = IdGenerator.getInstance();
+        this.scanner = new Scanner(System.in);
+    }
+
     public static void main(String[] args) {
-        String patientName = "Asha";
-        int patientAge = 29;
-        double consultationFee = 500.75;
-        int roundedFee = (int) consultationFee;
+        Main app = new Main();
 
         System.out.println("Welcome to " + Constants.APP_NAME);
-        System.out.println("Milestone 14: Strategy Pattern for billing");
-        System.out.println("Patient name valid: " + Validator.isValidName(patientName));
-        System.out.println("Patient age valid: " + Validator.isValidAge(patientAge));
-        System.out.println("Consultation fee: " + consultationFee);
-        System.out.println("Rounded fee after casting double to int: " + roundedFee);
-        System.out.println("Tax rate: " + Constants.TAX_RATE);
+        System.out.println("Milestone 15: menu-driven console UI");
         System.out.println(Constants.CONFIG_STATUS);
 
-        MedicalEntity sampleRecord = new MedicalEntity("ME-001") {
-            @Override
-            public String getDisplayName() {
-                return "Sample medical record";
-            }
-        };
-
-        System.out.println("Record ID: " + sampleRecord.getId());
-        System.out.println("Record name: " + sampleRecord.getDisplayName());
-        System.out.println("Record active: " + sampleRecord.isActive());
-
-        PatientService patientService = new PatientService();
-        DoctorService doctorService = new DoctorService();
-        AppointmentService appointmentService = new AppointmentService();
-        IdGenerator idGenerator = IdGenerator.getInstance();
-
         if (hasArgument(args, "--loadData")) {
-            loadSavedData(patientService, doctorService);
+            app.loadSavedData();
         }
 
-        Patient patient = new Patient(idGenerator.nextPatientId(), "Asha", 29);
-        Patient secondPatient = new Patient(idGenerator.nextPatientId(), "Asha Kapoor", 35);
-        Doctor doctor = new Doctor(idGenerator.nextDoctorId(), "Dr. Rao", Specialization.CARDIOLOGY, 12);
-        Doctor secondDoctor = new Doctor(idGenerator.nextDoctorId(), "Dr. Sen", Specialization.DERMATOLOGY, 7);
+        app.runMenu();
+    }
 
+    private void runMenu() {
+        boolean running = true;
+
+        while (running) {
+            printMenu();
+            int choice = readInt("Choose an option: ");
+
+            try {
+                switch (choice) {
+                    case 1:
+                        addPatient();
+                        break;
+                    case 2:
+                        listPatients();
+                        break;
+                    case 3:
+                        addDoctor();
+                        break;
+                    case 4:
+                        listDoctors();
+                        break;
+                    case 5:
+                        createAppointment();
+                        break;
+                    case 6:
+                        listAppointments();
+                        break;
+                    case 7:
+                        cancelAppointment();
+                        break;
+                    case 8:
+                        generateBill();
+                        break;
+                    case 9:
+                        saveCurrentData();
+                        break;
+                    case 0:
+                        saveCurrentData();
+                        running = false;
+                        System.out.println("Goodbye.");
+                        break;
+                    default:
+                        System.out.println("Please choose a valid option.");
+                }
+            } catch (RuntimeException e) {
+                System.out.println("Could not complete action: " + e.getMessage());
+            }
+        }
+    }
+
+    private void printMenu() {
+        System.out.println();
+        System.out.println("1. Add patient");
+        System.out.println("2. View patients");
+        System.out.println("3. Add doctor");
+        System.out.println("4. View doctors");
+        System.out.println("5. Create appointment");
+        System.out.println("6. View appointments");
+        System.out.println("7. Cancel appointment");
+        System.out.println("8. Generate bill");
+        System.out.println("9. Save data");
+        System.out.println("0. Save and exit");
+    }
+
+    private void addPatient() {
+        String name = readText("Patient name: ");
+        int age = readInt("Patient age: ");
+
+        Patient patient = new Patient(idGenerator.nextPatientId(), name, age);
         patientService.addPatient(patient);
-        patientService.addPatient(secondPatient);
+
+        System.out.println("Added patient: " + patient.getDisplayName());
+    }
+
+    private void listPatients() {
+        List<Patient> patients = patientService.findAllPatients();
+        if (patients.isEmpty()) {
+            System.out.println("No patients found.");
+            return;
+        }
+
+        for (Patient patient : patients) {
+            System.out.println(patient.getId() + " - " + patient.getDisplayName());
+        }
+    }
+
+    private void addDoctor() {
+        String name = readText("Doctor name: ");
+        Specialization specialization = readSpecialization();
+        double experience = readDouble("Experience in years: ");
+
+        Doctor doctor = new Doctor(idGenerator.nextDoctorId(), name, specialization, experience);
         doctorService.addDoctor(doctor);
-        doctorService.addDoctor(secondDoctor);
 
-        System.out.println("Patients stored: " + patientService.countPatients());
-        System.out.println("Doctors stored: " + doctorService.countDoctors());
-        System.out.println("Found patient: " + patientService.findPatientById("P-001").getDisplayName());
-        System.out.println("Found doctor: " + doctorService.findDoctorById("D-001").getDisplayName());
-        System.out.println("Patients named Asha: " + patientService.search("Asha").size());
-        System.out.println("Patients aged 35: " + patientService.searchPatient(35).size());
-        System.out.println("Cardiology doctors: " + doctorService.search(Specialization.CARDIOLOGY).size());
+        System.out.println("Added doctor: " + doctor.getDisplayName());
+    }
 
-        Appointment appointment = appointmentService.createAppointment(idGenerator.nextAppointmentId(), doctor, patient, new Date());
-        System.out.println("Appointments stored: " + appointmentService.countAppointments());
+    private void listDoctors() {
+        List<Doctor> doctors = doctorService.findAllDoctors();
+        if (doctors.isEmpty()) {
+            System.out.println("No doctors found.");
+            return;
+        }
+
+        for (Doctor doctor : doctors) {
+            System.out.println(doctor.getId() + " - " + doctor.getDisplayName());
+        }
+    }
+
+    private void createAppointment() {
+        String doctorId = readText("Doctor ID: ");
+        String patientId = readText("Patient ID: ");
+
+        Doctor doctor = doctorService.findDoctorById(doctorId);
+        Patient patient = patientService.findPatientById(patientId);
+
+        if (doctor == null) {
+            throw new InvalidDataException("Doctor not found for id: " + doctorId);
+        }
+        if (patient == null) {
+            throw new InvalidDataException("Patient not found for id: " + patientId);
+        }
+
+        Appointment appointment = appointmentService.createAppointment(
+                idGenerator.nextAppointmentId(),
+                doctor,
+                patient,
+                new Date()
+        );
+
         System.out.println("Created appointment: " + appointment.getDisplayName());
+    }
 
-        appointmentService.cancelAppointment("A-001");
-        System.out.println("Cancelled appointments: " + appointmentService.search(AppointmentStatus.CANCELLED).size());
+    private void listAppointments() {
+        List<Appointment> appointments = appointmentService.findAllAppointments();
+        if (appointments.isEmpty()) {
+            System.out.println("No appointments found.");
+            return;
+        }
 
-        Bill bill = new Bill(idGenerator.nextBillId(), appointment, 800);
+        for (Appointment appointment : appointments) {
+            System.out.println(appointment.getId() + " - " + appointment.getDisplayName());
+        }
+    }
+
+    private void cancelAppointment() {
+        String appointmentId = readText("Appointment ID: ");
+        appointmentService.cancelAppointment(appointmentId);
+        System.out.println("Cancelled appointment: " + appointmentId);
+    }
+
+    private void generateBill() {
+        String appointmentId = readText("Appointment ID: ");
+        double consultationFee = readDouble("Consultation fee: ");
+        BillingStrategy billingStrategy = readBillingStrategy();
+
+        Appointment appointment = appointmentService.findAppointmentById(appointmentId);
+        if (appointment == null) {
+            throw new InvalidDataException("Appointment not found for id: " + appointmentId);
+        }
+
+        Bill bill = new Bill(idGenerator.nextBillId(), appointment, consultationFee, billingStrategy);
         BillSummary billSummary = bill.generateBill();
+
         System.out.println("Generated bill: " + billSummary.getDisplayText());
+    }
 
-        Bill emergencyBill = new Bill(idGenerator.nextBillId(), appointment, 800, new EmergencyBillingStrategy());
-        BillSummary emergencyBillSummary = emergencyBill.generateBill();
-        System.out.println("Generated emergency bill: " + emergencyBillSummary.getDisplayText());
+    private Specialization readSpecialization() {
+        System.out.println("Available specializations:");
+        for (Specialization specialization : Specialization.values()) {
+            System.out.println("- " + specialization);
+        }
 
-        Appointment clonedAppointment = appointment.clone();
-        patient.setName("Asha Updated");
+        String value = readText("Specialization: ");
+        return Specialization.valueOf(value.trim().toUpperCase());
+    }
 
-        System.out.println("Original appointment patient: " + appointment.getPatient().getName());
-        System.out.println("Cloned appointment patient: " + clonedAppointment.getPatient().getName());
+    private BillingStrategy readBillingStrategy() {
+        System.out.println("Billing type:");
+        System.out.println("1. Standard");
+        System.out.println("2. Emergency");
+        System.out.println("3. Follow up");
 
-        saveCurrentData(patientService, doctorService);
+        int choice = readInt("Choose billing type: ");
+        switch (choice) {
+            case 1:
+                return new StandardBillingStrategy();
+            case 2:
+                return new EmergencyBillingStrategy();
+            case 3:
+                return new FollowUpBillingStrategy();
+            default:
+                throw new InvalidDataException("Invalid billing type.");
+        }
+    }
+
+    private String readText(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine();
+    }
+
+    private int readInt(String prompt) {
+        while (true) {
+            try {
+                return Integer.parseInt(readText(prompt));
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid whole number.");
+            }
+        }
+    }
+
+    private double readDouble(String prompt) {
+        while (true) {
+            try {
+                return Double.parseDouble(readText(prompt));
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
     }
 
     private static boolean hasArgument(String[] args, String expectedArgument) {
@@ -108,17 +282,17 @@ public class Main {
         return false;
     }
 
-    private static void loadSavedData(PatientService patientService, DoctorService doctorService) {
+    private void loadSavedData() {
         try {
             List<Patient> patients = CSVUtil.loadPatients(Constants.PATIENTS_CSV_PATH);
             List<Doctor> doctors = CSVUtil.loadDoctors(Constants.DOCTORS_CSV_PATH);
 
-            for (Patient savedPatient : patients) {
-                patientService.addPatient(savedPatient);
+            for (Patient patient : patients) {
+                patientService.addPatient(patient);
             }
 
-            for (Doctor savedDoctor : doctors) {
-                doctorService.addDoctor(savedDoctor);
+            for (Doctor doctor : doctors) {
+                doctorService.addDoctor(doctor);
             }
 
             System.out.println("Loaded patients from CSV: " + patients.size());
@@ -128,7 +302,7 @@ public class Main {
         }
     }
 
-    private static void saveCurrentData(PatientService patientService, DoctorService doctorService) {
+    private void saveCurrentData() {
         try {
             CSVUtil.savePatients(patientService.findAllPatients(), Constants.PATIENTS_CSV_PATH);
             CSVUtil.saveDoctors(doctorService.findAllDoctors(), Constants.DOCTORS_CSV_PATH);
